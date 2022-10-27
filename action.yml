@@ -1,0 +1,32 @@
+name: 'Test Execution Dashboard Data Import'
+description: 'Extract ApexTestRunResult and ApexTestResult records, transform and import into org with Test Execution Dashbaord app installed.'
+inputs:
+  source-alias:
+    description: 'Alias/Username of the pre-authorised salesforce org to download Apex Test (Run) Results from using the CLI. Default environment org if blank'
+    required: false
+  target-alias:
+    description: 'Alias/Username of the pre-authorised salesforce org to import Test Result / Run to using the CLI. Default environment org if blank'
+    required: true
+  test-run-id:
+    description: 'AsyncApexJobId of the Test Execution to download and import. All Completed Test Executions if blank'
+    required: false
+  package-namespace:
+    description: 'Namespace of installed Test Execution Dashboard version. Used to correctly prefix the Field names. Default PragBear'
+    required: false
+    default: 'PragBear'
+branding:
+  icon: 'refresh-ccw'
+  color: 'blue'
+
+runs:
+  using: 'composite'
+  steps:  
+    - name: 'Record Test Run Results'
+      shell: bash
+      run: |
+        bash ${GITHUB_ACTION_PATH}/scripts/bash/import-test-result.sh --testrunid ${{ inputs.test-run-id }} --targetusername ${{ inputs.target-alias }} --sourceusername ${{ inputs.source-alias }} --namespace ${{ inputs.package-namespace }}
+
+    - name: 'Record Test Results'
+      shell: bash
+      run: |
+        bash ${GITHUB_ACTION_PATH}/scripts/bash/import-test-run.sh --testrunid ${{ inputs.test-run-id }} --targetusername ${{ inputs.target-alias }} --sourceusername ${{ inputs.source-alias }} --namespace ${{ inputs.package-namespace }}
